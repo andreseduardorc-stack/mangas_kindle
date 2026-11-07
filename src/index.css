@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --kindle-paper: #fbf8f1;
+    --kindle-ink: #1a1918;
+    --kindle-border: #dcd7ce;
+    --kindle-subtle: #6c6a65;
+    --kindle-gray: #eeebd9;
+    --kindle-accent: #2c2b29;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Amazon Ember", Bookerly, Georgia, serif;
+    background-color: var(--kindle-paper);
+    color: var(--kindle-ink);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
+/* E-ink simulated effects and Kindle themes */
+.theme-paperwhite {
+  background-color: #f7f6f2 !important;
+  color: #121212 !important;
+}
+
+.theme-sepia {
+  background-color: #f4ecd8 !important;
+  color: #382c1e !important;
+}
+
+.theme-eink-contrast {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  filter: contrast(1.15) grayscale(100%);
+}
+
+.theme-dark {
+  background-color: #121212 !important;
+  color: #e2e2e2 !important;
+}
+
+/* Kindle scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.45);
+}

@@ -1,0 +1,81 @@
+{
+  "id": "kindle-manga-reader-app",
+  "name": "Kindle Manga & Manhwa Reader",
+  "short_name": "KindleManga",
+  "description": "Lector de mangas y cómics en español con menús, estética de tinta electrónica (E-Ink) y ergonomía de Amazon Kindle Paperwhite.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "fullscreen"
+  ],
+  "orientation": "any",
+  "background_color": "#2c2b29",
+  "theme_color": "#2c2b29",
+  "lang": "es",
+  "categories": [
+    "books",
+    "entertainment",
+    "comics"
+  ],
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/screenshot-mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pantalla de inicio estilo Kindle en teléfono móvil"
+    },
+    {
+      "src": "screenshots/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Catálogo completo de Olympus en pantalla panorámica"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Biblioteca",
+      "url": "./?tab=library",
+      "description": "Abrir tu biblioteca Kindle",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Catálogo Olympus",
+      "url": "./?tab=discover",
+      "description": "Explorar catálogo en español",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

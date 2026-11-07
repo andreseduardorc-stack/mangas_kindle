@@ -1,0 +1,550 @@
+[
+  [
+    "ShallowReactive",
+    1
+  ],
+  {
+    "data": 2,
+    "state": 185,
+    "once": 194,
+    "_errors": 195,
+    "serverRendered": 197,
+    "path": 198
+  },
+  [
+    "ShallowReactive",
+    3
+  ],
+  {
+    "$f2d9crc5nbjo3v": 4
+  },
+  {
+    "data": 5
+  },
+  {
+    "series": 6,
+    "recommended_series": 142
+  },
+  {
+    "current_page": 7,
+    "data": 8,
+    "from": 7,
+    "last_page": 139,
+    "per_page": 140,
+    "to": 140,
+    "total": 141
+  },
+  1,
+  [
+    9,
+    20,
+    30,
+    38,
+    46,
+    54,
+    64,
+    72,
+    82,
+    90,
+    98,
+    106,
+    114,
+    122,
+    129
+  ],
+  {
+    "id": 10,
+    "name": 11,
+    "slug": 12,
+    "status": 13,
+    "cover": 15,
+    "cover_srcset": 16,
+    "chapter_count": 17,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  11,
+  "Academia de la Ascensión",
+  "academia-de-la-ascension-20261107-080508060",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "Activo",
+  "https://media.imagesolymp.xyz/comics/covers/11/tmpedu9scno-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/11/tmpedu9scno-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/11/tmpedu9scno-xl.webp 1536w",
+  201,
+  "comic",
+  0,
+  {
+    "id": 21,
+    "name": 22,
+    "slug": 23,
+    "status": 24,
+    "cover": 27,
+    "cover_srcset": 28,
+    "chapter_count": 29,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1039,
+  "Academia privada laprossa (Spin off de <el hijo menor del maestro de la espada>)",
+  "academia-privada-laprossa",
+  {
+    "id": 25,
+    "name": 26
+  },
+  4,
+  "Finalizado",
+  "https://media.imagesolymp.xyz/comics/covers/1039/Academia-privada-laprossa-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1039/Academia-privada-laprossa-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1039/Academia-privada-laprossa-xl.webp 1536w",
+  53,
+  {
+    "id": 31,
+    "name": 32,
+    "slug": 33,
+    "status": 34,
+    "cover": 35,
+    "cover_srcset": 36,
+    "chapter_count": 37,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1336,
+  "Acampando en otro Mundo: buscandole el sazon a la vida",
+  "acampando-en-otro-mundo-buscandole-el-sazon-a-la-vida-20261107-080751868",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1336/tmpmpwr_my_-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1336/tmpmpwr_my_-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1336/tmpmpwr_my_-xl.webp 1536w",
+  121,
+  {
+    "id": 39,
+    "name": 40,
+    "slug": 41,
+    "status": 42,
+    "cover": 43,
+    "cover_srcset": 44,
+    "chapter_count": 45,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1279,
+  "Accidentalmente me hice famoso a lo largo de la historia",
+  "accidentalmente-me-hice-famoso-a-lo-largo-de-la-historia",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1279/Accidentalmente-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1279/Accidentalmente-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1279/Accidentalmente-xl.webp 1536w",
+  10,
+  {
+    "id": 47,
+    "name": 48,
+    "slug": 49,
+    "status": 50,
+    "cover": 51,
+    "cover_srcset": 52,
+    "chapter_count": 53,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1706,
+  "¡¡Acero, Sangre,  Murim!!",
+  "acero-sangre-murim",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1706/tmptoifr4h0-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1706/tmptoifr4h0-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1706/tmptoifr4h0-xl.webp 1536w",
+  38,
+  {
+    "id": 55,
+    "name": 56,
+    "slug": 57,
+    "status": 58,
+    "cover": 61,
+    "cover_srcset": 62,
+    "chapter_count": 63,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1497,
+  "Actuando como el villano de ojos de zorro Perfecto",
+  "actuando-como-el-villano-de-ojos-de-zorro-perfecto-20261107-080616565",
+  {
+    "id": 59,
+    "name": 60
+  },
+  3,
+  "Pausado por el autor (Hiatus)",
+  "https://media.imagesolymp.xyz/comics/covers/1497/tmpsawpx7_z-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1497/tmpsawpx7_z-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1497/tmpsawpx7_z-xl.webp 1536w",
+  55,
+  {
+    "id": 65,
+    "name": 66,
+    "slug": 67,
+    "status": 68,
+    "cover": 69,
+    "cover_srcset": 70,
+    "chapter_count": 71,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1232,
+  "Actúe como un jefecito final, Sr. devorador",
+  "actue-com20-225-l-sr-devorador",
+  {
+    "id": 59,
+    "name": 60
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1232/tmptmrkzq51-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1232/tmptmrkzq51-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1232/tmptmrkzq51-xl.webp 1536w",
+  157,
+  {
+    "id": 73,
+    "name": 74,
+    "slug": 75,
+    "status": 76,
+    "cover": 79,
+    "cover_srcset": 80,
+    "chapter_count": 81,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  12,
+  "Acumulación en el Infierno",
+  "al-que-10-05-2025uieren-chupar513424",
+  {
+    "id": 77,
+    "name": 78
+  },
+  5,
+  "Cancelado por el autor",
+  "https://media.imagesolymp.xyz/comics/covers/12/acumulacion-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/12/acumulacion-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/12/acumulacion-xl.webp 1536w",
+  62,
+  {
+    "id": 83,
+    "name": 84,
+    "slug": 85,
+    "status": 86,
+    "cover": 87,
+    "cover_srcset": 88,
+    "chapter_count": 89,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1427,
+  "Acumulador de rasgos",
+  "acumulador-de-rasgos-20261107-080553475",
+  {
+    "id": 77,
+    "name": 78
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1427/tmpixs69wmr-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1427/tmpixs69wmr-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1427/tmpixs69wmr-xl.webp 1536w",
+  90,
+  {
+    "id": 91,
+    "name": 92,
+    "slug": 93,
+    "status": 94,
+    "cover": 95,
+    "cover_srcset": 96,
+    "chapter_count": 97,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1666,
+  "Al caer la luz de la luna ",
+  "al-caer-la-luz-de-la-luna",
+  {
+    "id": 59,
+    "name": 60
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1666/tmpmhstwxfd-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1666/tmpmhstwxfd-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1666/tmpmhstwxfd-xl.webp 1536w",
+  47,
+  {
+    "id": 99,
+    "name": 100,
+    "slug": 101,
+    "status": 102,
+    "cover": 103,
+    "cover_srcset": 104,
+    "chapter_count": 105,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1465,
+  "Al Comienzo del Período Primordial, Tomé a Minghe como mi Hija Adoptiva",
+  "al-comienzo-del-periodo-primordial-tome-a-minghe-como-mi-hija-adoptiva",
+  null,
+  "https://media.imagesolymp.xyz/comics/covers/1465/1-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1465/1-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1465/1-xl.webp 1536w",
+  32,
+  {
+    "id": 107,
+    "name": 108,
+    "slug": 109,
+    "status": 110,
+    "cover": 111,
+    "cover_srcset": 112,
+    "chapter_count": 113,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  17,
+  "Al demonio con ser un santo, soy un medico",
+  "al-de20-225-n-medico",
+  {
+    "id": 59,
+    "name": 60
+  },
+  "https://media.imagesolymp.xyz/comics/covers/17/medico elfas-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/17/medico elfas-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/17/medico elfas-xl.webp 1536w",
+  188,
+  {
+    "id": 115,
+    "name": 116,
+    "slug": 117,
+    "status": 118,
+    "cover": 119,
+    "cover_srcset": 120,
+    "chapter_count": 121,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1645,
+  "Al Diablo la Ventana de Estado",
+  "al-diablo-la-ventana-de-estado-20261107-080839685",
+  {
+    "id": 25,
+    "name": 26
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1645/tmp8u_fwow9-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1645/tmp8u_fwow9-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1645/tmp8u_fwow9-xl.webp 1536w",
+  42,
+  {
+    "id": 123,
+    "name": 124,
+    "slug": 125,
+    "status": 126,
+    "cover": 127,
+    "cover_srcset": 128,
+    "chapter_count": 7,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  1051,
+  "AL ENTREGAR LA ANTIGUA HIERBA INMORTAL AL PRINCIPIO, ASUSTÉ A LOS DIOSES",
+  "al-entregar-la-antigua-hierba-inmortal-al-principio-asuste-a-los-dioses",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1051/portada-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1051/portada-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1051/portada-xl.webp 1536w",
+  {
+    "id": 130,
+    "name": 131,
+    "slug": 132,
+    "status": 133,
+    "cover": 136,
+    "cover_srcset": 137,
+    "chapter_count": 138,
+    "type": 18,
+    "total_views": 19,
+    "monthly_views": 19
+  },
+  78,
+  "Alma 5",
+  "al5zxzma-5",
+  {
+    "id": 134,
+    "name": 135
+  },
+  7,
+  "Abandonado por el scan",
+  "https://media.imagesolymp.xyz/comics/covers/78/cover_-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/78/cover_-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/78/cover_-xl.webp 1536w",
+  145,
+  60,
+  15,
+  888,
+  [
+    143,
+    150,
+    157,
+    164,
+    171,
+    178
+  ],
+  {
+    "id": 144,
+    "name": 145,
+    "slug": 146,
+    "status": 147,
+    "cover": 148,
+    "cover_srcset": 149,
+    "type": 18
+  },
+  1784,
+  "El Novato Asesino de Villanos",
+  "el-novato-asesino-de-villanos",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1784/eb2c48c0-b26c-48bb-8a1c-9f2251df20f9-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1784/eb2c48c0-b26c-48bb-8a1c-9f2251df20f9-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1784/eb2c48c0-b26c-48bb-8a1c-9f2251df20f9-xl.webp 1536w",
+  {
+    "id": 151,
+    "name": 152,
+    "slug": 153,
+    "status": 154,
+    "cover": 155,
+    "cover_srcset": 156,
+    "type": 18
+  },
+  1786,
+  "El caballero prodigio de una raza caída",
+  "el-caballero-prodigio-de-una-raza-caida",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1786/32e47652-79a3-43ba-9836-b676b22c51ba-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1786/32e47652-79a3-43ba-9836-b676b22c51ba-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1786/32e47652-79a3-43ba-9836-b676b22c51ba-xl.webp 1536w",
+  {
+    "id": 158,
+    "name": 159,
+    "slug": 160,
+    "status": 161,
+    "cover": 162,
+    "cover_srcset": 163,
+    "type": 18
+  },
+  1785,
+  "El Slime Estrella del Streaming",
+  "el-slime-estrella-del-streaming",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1785/df218841-7936-4dfe-b9d2-330bab377643-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1785/df218841-7936-4dfe-b9d2-330bab377643-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1785/df218841-7936-4dfe-b9d2-330bab377643-xl.webp 1536w",
+  {
+    "id": 165,
+    "name": 166,
+    "slug": 167,
+    "status": 168,
+    "cover": 169,
+    "cover_srcset": 170,
+    "type": 18
+  },
+  1781,
+  "Toma un Grimorio y Conviértete en Mago",
+  "toma-un-grimorio-y-conviertete-en-mago",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1781/293f41d2-3bf3-41d7-ad7f-2fd5c3ae6fd1-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1781/293f41d2-3bf3-41d7-ad7f-2fd5c3ae6fd1-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1781/293f41d2-3bf3-41d7-ad7f-2fd5c3ae6fd1-xl.webp 1536w",
+  {
+    "id": 172,
+    "name": 173,
+    "slug": 174,
+    "status": 175,
+    "cover": 176,
+    "cover_srcset": 177,
+    "type": 18
+  },
+  1780,
+  "El Regresor y la Santa Ciega",
+  "el-regresor-y-la-santa-ciega",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1780/tmp4c0_zvu1-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1780/tmp4c0_zvu1-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1780/tmp4c0_zvu1-xl.webp 1536w",
+  {
+    "id": 179,
+    "name": 180,
+    "slug": 181,
+    "status": 182,
+    "cover": 183,
+    "cover_srcset": 184,
+    "type": 18
+  },
+  1782,
+  "Nigromante con dinero ilimitado",
+  "nigromante-con-dinero-ilimitado",
+  {
+    "id": 7,
+    "name": 14
+  },
+  "https://media.imagesolymp.xyz/comics/covers/1782/b69c80f1-1057-448a-9fe3-fdb34076f022-lg.webp",
+  "https://media.imagesolymp.xyz/comics/covers/1782/b69c80f1-1057-448a-9fe3-fdb34076f022-lg.webp 768w, https://media.imagesolymp.xyz/comics/covers/1782/b69c80f1-1057-448a-9fe3-fdb34076f022-xl.webp 1536w",
+  [
+    "Reactive",
+    186
+  ],
+  {
+    "$sdomain": 187,
+    "$suser": -1,
+    "$snotifications": 193
+  },
+  {
+    "data": 102,
+    "domains": 188
+  },
+  {
+    "high_risk": 189,
+    "low_risk": 190,
+    "neutral": 191
+  },
+  [],
+  [],
+  [
+    192
+  ],
+  "olympusxyz.com",
+  [],
+  [
+    "Set"
+  ],
+  [
+    "ShallowReactive",
+    196
+  ],
+  {
+    "$f2d9crc5nbjo3v": -1,
+    "$f1yjwugf1sq4lg": -1,
+    "$f3qayeavytvc6q": -1
+  },
+  true,
+  "/series?tipo=comic"
+]
