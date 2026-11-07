@@ -54,28 +54,26 @@ export const MangaDetailModal: React.FC<MangaDetailModalProps> = ({
         }
       });
 
-      const localList = loadChapters(manga.id);
-      if (localList && localList.length > 2) {
-        setChapters(localList);
-        setLoading(false);
-      } else {
-        fetchOlympusChapters(manga.id, slug)
-          .then((chs) => {
-            if (chs.length > 0) {
-              setChapters(chs);
-              saveChapters(manga.id, chs);
-            } else if (localList && localList.length > 0) {
-              setChapters(localList);
-            }
-          })
-          .catch((err) => {
-            console.error(err);
+      fetchOlympusChapters(manga.id, slug)
+        .then((chs) => {
+          if (chs.length > 0) {
+            setChapters(chs);
+            saveChapters(manga.id, chs);
+          } else {
+            const localList = loadChapters(manga.id);
             if (localList && localList.length > 0) {
               setChapters(localList);
             }
-          })
-          .finally(() => setLoading(false));
-      }
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          const localList = loadChapters(manga.id);
+          if (localList && localList.length > 0) {
+            setChapters(localList);
+          }
+        })
+        .finally(() => setLoading(false));
       return;
     }
 

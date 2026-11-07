@@ -35,6 +35,64 @@ interface KindleReaderProps {
   onSelectChapter: (chapter: Chapter) => void;
 }
 
+interface KindlePageImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+  loading?: 'lazy' | 'eager';
+  draggable?: boolean;
+}
+
+const KindlePageImage: React.FC<KindlePageImageProps> = ({
+  src,
+  alt,
+  className,
+  style,
+  loading = 'lazy',
+  draggable = false,
+}) => {
+  const [currentSrc, setCurrentSrc] = useState(src);
+  const [attempt, setAttempt] = useState(0);
+  const [isBroken, setIsBroken] = useState(false);
+
+  useEffect(() => {
+    setCurrentSrc(src);
+    setAttempt(0);
+    setIsBroken(false);
+  }, [src]);
+
+  const handleError = () => {
+    // If e.g. /01.webp fails, try /1.webp
+    if (attempt === 0 && /\/0(\d+\.webp)$/.test(currentSrc)) {
+      setAttempt(1);
+      setCurrentSrc(currentSrc.replace(/\/0(\d+\.webp)$/, '/$1'));
+    } else if (attempt <= 1 && /\/(\d+\.webp)$/.test(currentSrc) && !currentSrc.includes('/00')) {
+      // try /001.webp
+      setAttempt(2);
+      setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/00$1'));
+    } else {
+      setIsBroken(true);
+    }
+  };
+
+  if (isBroken) {
+    return null;
+  }
+
+  return (
+    <img
+      src={currentSrc}
+      alt={alt}
+      className={className}
+      style={style}
+      loading={loading}
+      draggable={draggable}
+      onError={handleError}
+    />
+  );
+};
+
 export const KindleReader: React.FC<KindleReaderProps> = ({
   manga,
   chapter,
@@ -716,7 +774,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
                 data-page-index={idx + 1}
                 className="relative w-full max-w-2xl flex flex-col items-center"
               >
-                <img
+                <KindlePageImage
                   src={pageUrl}
                   alt={`Página ${idx + 1}`}
                   className="w-full h-auto object-contain shadow-sm"
@@ -749,7 +807,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
           /* SINGLE PAGE MODE (Manga RTL or Comic LTR) */
           <div className="relative flex flex-col items-center justify-center p-2 max-h-full max-w-full">
             {pages[currentPage - 1] ? (
-              <img
+              <KindlePageImage
                 src={pages[currentPage - 1]}
                 alt={`Página ${currentPage}`}
                 className={`${getImageFitClass()} shadow-md transition-all select-none`}
