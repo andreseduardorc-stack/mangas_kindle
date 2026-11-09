@@ -16,6 +16,7 @@ import {
   Check,
   Play,
   Pause,
+  BookOpen,
 } from 'lucide-react';
 import type { Manga, Chapter, ReaderSettings, Bookmark, ReadingMode, KindleTheme, FitMode } from '../types';
 import { fetchChapterPages } from '../services/mangaDexApi';
@@ -71,6 +72,10 @@ const KindlePageImage: React.FC<KindlePageImageProps> = ({
       // try /001.webp
       setAttempt(2);
       setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/00$1'));
+    } else if (attempt <= 2 && !currentSrc.includes('_')) {
+      // try /1_01.webp pattern
+      setAttempt(3);
+      setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/1_$1'));
     } else {
       setIsBroken(true);
     }
@@ -139,47 +144,54 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
 
   // Sync chaptersList with allChapters
   useEffect(() => {
-    if (allChapters && allChapters.length > 0) {
-      setChaptersList(allChapters);
-    }
-    if (manga.source === 'olympus' && (!allChapters || allChapters.length <= 2)) {
+    if (manga.source === 'olympus') {
       const slug = (manga as any).olympusSlug || manga.id.replace('olympus-', '');
       fetchOlympusChapters(manga.id, slug).then((chs) => {
         if (chs.length > 0) {
           setChaptersList(chs);
+        } else if (allChapters && allChapters.length > 0) {
+          setChaptersList(allChapters);
         }
       });
+    } else if (allChapters && allChapters.length > 0) {
+      setChaptersList(allChapters);
     }
   }, [allChapters, manga.id]);
 
   // Load pages if chapter has empty pages array
   useEffect(() => {
+    setCurrentPage(initialPage || 1);
+    if (verticalContainerRef.current) {
+      verticalContainerRef.current.scrollTop = 0;
+    }
+
     if (chapter.pages && chapter.pages.length > 0) {
       setPages(chapter.pages);
-      setCurrentPage(Math.min(initialPage, chapter.pages.length));
+      setLoadingPages(false);
     } else {
       setLoadingPages(true);
+      setPages([]);
 
-      const fetchPromise = manga.id.startsWith('olympus-')
-        ? fetchOlympusChapterPages(manga.id, chapter.chapterNumber, (manga as any).olympusSlug)
-        : fetchChapterPages(chapter.id);
+      const fetchPromise =
+        manga.id.startsWith('olympus-') || manga.source === 'olympus'
+          ? fetchOlympusChapterPages(manga.id, chapter.chapterNumber, (manga as any).olympusSlug)
+          : fetchChapterPages(chapter.id);
 
       fetchPromise
         .then((fetchedPages) => {
           if (fetchedPages.length > 0) {
             setPages(fetchedPages);
           } else {
-            setPages([chapter.pages?.[0] || manga.coverUrl]);
+            setPages([]);
           }
-          setCurrentPage(1);
         })
         .catch((err) => {
           console.error(err);
-          setPages([manga.coverUrl]);
+          setPages([]);
         })
         .finally(() => setLoadingPages(false));
     }
-  }, [chapter.id]);
+  }, [chapter.id, chapter.chapterNumber]);
 
   // Track scroll position in vertical mode to update Kindle location & progress
   useEffect(() => {
@@ -252,7 +264,9 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
     }
   };
 
-  const currentChIndex = chaptersList.findIndex((c) => c.id === chapter.id);
+  const currentChIndex = chaptersList.findIndex(
+    (c) => c.id === chapter.id || String(c.chapterNumber) === String(chapter.chapterNumber)
+  );
   const hasNextChapter = currentChIndex !== -1 && currentChIndex < chaptersList.length - 1;
   const hasPrevChapter = currentChIndex > 0;
 
@@ -761,6 +775,42 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
           <div className="flex flex-col items-center justify-center space-y-3 font-sans text-[#55524c]">
             <Loader2 className="w-10 h-10 animate-spin text-[#1a1918]" />
             <p className="text-sm font-medium">Cargando páginas del capítulo...</p>
+          </div>
+        ) : pages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto space-y-4 font-serif">
+            <div className="w-16 h-16 rounded-full bg-[#ede8dc] border border-[#d6cfbd] flex items-center justify-center text-[#2c2b29]">
+              <BookOpen className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-[#1a1918]">
+              {chapter.title}
+            </h3>
+            <p className="text-xs font-sans text-[#635f56] leading-relaxed">
+              Las imágenes de este capítulo no se encuentran disponibles temporalmente en el servidor de Olympus.
+            </p>
+            <div className="flex items-center space-x-3 pt-2 font-sans text-xs">
+              {hasPrevChapter && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToPrevChapter();
+                  }}
+                  className="px-4 py-2 bg-[#ded8c7] rounded-xl font-bold text-[#2c2b29] hover:bg-[#d6cfbd]"
+                >
+                  ← Cap. Anterior
+                </button>
+              )}
+              {hasNextChapter && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToNextChapter();
+                  }}
+                  className="px-4 py-2 bg-[#2c2b29] rounded-xl font-bold text-white hover:bg-[#1a1918]"
+                >
+                  Cap. Siguiente →
+                </button>
+              )}
+            </div>
           </div>
         ) : readerSettings.readingMode === 'webtoon-vertical' ? (
           /* VERTICAL CONTINUOUS SCROLL MODE (Manhwa / Webtoon) */
