@@ -241,7 +241,26 @@ export async function fetchOlympusChapterPages(
     }
   } catch {}
 
-  // 4. Live fetch attempt via CORS proxy if online (with 6s timeout)
+  // 4. If we have seriesId and chapterId from index, generate candidate CDN URLs for this specific chapter
+  if (seriesId && seriesChaptersData[seriesId]) {
+    const chMeta = seriesChaptersData[seriesId].chapters.find(
+      (c) => String(c.name) === String(chapterNumber)
+    );
+    if (chMeta && chMeta.id) {
+      const chapterInternalId = chMeta.id;
+      // Generate up to 45 candidate CDN page URLs for this specific chapter ID
+      const candidatePages: string[] = [];
+      for (let p = 1; p <= 45; p++) {
+        const pStr = p < 10 ? `0${p}` : `${p}`;
+        candidatePages.push(
+          `https://media.imagesolymp.xyz/comics/${seriesId}/${chapterInternalId}/${pStr}.webp`
+        );
+      }
+      return candidatePages;
+    }
+  }
+
+  // 5. Fallback: Live fetch attempt via CORS proxy if online (fast 3s timeout)
   const proxyUrls = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(
       `https://olympusxyz.com/series/comic-${effectiveSlug}/capitulo/${chapterNumber}`
@@ -252,7 +271,7 @@ export async function fetchOlympusChapterPages(
   for (const pUrl of proxyUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const res = await fetch(pUrl, {
         signal: controller.signal,
@@ -279,25 +298,6 @@ export async function fetchOlympusChapterPages(
       }
     } catch {
       // try next
-    }
-  }
-
-  // 5. If we have seriesId and chapterId from index, generate candidate CDN URLs for this specific chapter
-  if (seriesId && seriesChaptersData[seriesId]) {
-    const chMeta = seriesChaptersData[seriesId].chapters.find(
-      (c) => String(c.name) === String(chapterNumber)
-    );
-    if (chMeta && chMeta.id) {
-      const chapterInternalId = chMeta.id;
-      // Generate up to 45 candidate CDN page URLs for this specific chapter ID
-      const candidatePages: string[] = [];
-      for (let p = 1; p <= 45; p++) {
-        const pStr = p < 10 ? `0${p}` : `${p}`;
-        candidatePages.push(
-          `https://media.imagesolymp.xyz/comics/${seriesId}/${chapterInternalId}/${pStr}.webp`
-        );
-      }
-      return candidatePages;
     }
   }
 

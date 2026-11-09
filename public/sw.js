@@ -1,6 +1,5 @@
 // Service Worker for Kindle Manga & Manhwa Reader (PWABuilder & GitHub Pages Ready)
-const CACHE_NAME = 'kindle-manga-cache-v2';
-const IMAGE_CACHE_NAME = 'kindle-manga-images-v2';
+const CACHE_NAME = 'kindle-manga-cache-v4';
 
 const STATIC_ASSETS = [
   './',
@@ -9,10 +8,12 @@ const STATIC_ASSETS = [
   './favicon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png'
 ];
 
-// Install: Cache essential shell
+// Install: Cache essential app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -22,13 +23,14 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate: Clean old caches
+// Activate: Purge ALL older caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME && key !== IMAGE_CACHE_NAME) {
+          if (key !== CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', key);
             return caches.delete(key);
           }
         })
@@ -38,7 +40,8 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: Strategy depending on request type
+// Fetch: ONLY handle same-origin static assets and navigation
+// NEVER intercept external CDN images (media.imagesolymp.xyz) to allow native browser rendering
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -46,31 +49,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // 1. Chapter Images (from media.imagesolymp.xyz or local): Cache First / Stale-While-Revalidate
-  if (
-    url.hostname.includes('imagesolymp.xyz') ||
-    url.pathname.match(/\.(webp|jpg|jpeg|png|svg)$/i)
-  ) {
-    event.respondWith(
-      caches.open(IMAGE_CACHE_NAME).then((cache) => {
-        return cache.match(request).then((cachedResponse) => {
-          if (cachedResponse) return cachedResponse;
-
-          return fetch(request)
-            .then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
-                cache.put(request, networkResponse.clone());
-              }
-              return networkResponse;
-            })
-            .catch(() => cachedResponse);
-        });
-      })
-    );
+  // Let browser natively handle external CDNs (like media.imagesolymp.xyz) without interception
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  // 2. Navigation / HTML pages: Network First with Cache fallback
+  // 1. Navigation / HTML pages: Network First with Cache fallback
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
@@ -80,20 +64,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static assets: Cache First with Network fallback
+  // 2. Same-origin Static assets: Cache First with Network fallback
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+      return fetch(request)
+        .then((response) => {
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response;
+          }
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseToCache);
+          });
           return response;
-        }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseToCache);
+        })
+        .catch(() => {
+          return new Response('Offline', { status: 503, statusText: 'Offline' });
         });
-        return response;
-      });
     })
   );
 });

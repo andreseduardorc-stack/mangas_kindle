@@ -82,7 +82,18 @@ const KindlePageImage: React.FC<KindlePageImageProps> = ({
   };
 
   if (isBroken) {
-    return null;
+    return (
+      <div
+        onClick={() => {
+          setIsBroken(false);
+          setAttempt(0);
+          setCurrentSrc(src);
+        }}
+        className="w-full max-w-2xl py-6 px-4 bg-[#f2eee3] border border-dashed border-[#d6cfbd] rounded-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-[#eae4d5] transition-colors my-1 text-[#55524c]"
+      >
+        <span className="font-serif font-bold text-xs text-[#1a1918]">Reintentar viñeta {alt}</span>
+      </div>
+    );
   }
 
   return (
@@ -828,7 +839,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
                   src={pageUrl}
                   alt={`Página ${idx + 1}`}
                   className="w-full h-auto object-contain shadow-sm"
-                  loading="lazy"
+                  loading={idx < 3 ? 'eager' : 'lazy'}
                 />
                 <span className="text-[10px] font-sans text-[#8c8577] mt-1 mb-2">
                   Página {idx + 1} de {pages.length}
