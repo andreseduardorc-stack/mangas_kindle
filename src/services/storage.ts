@@ -67,16 +67,16 @@ export function saveLibrary(mangas: Manga[]): void {
 
 export function loadChapters(mangaId: string): Chapter[] {
   try {
-    // 1. Check Olympus chapters first
-    if (OLYMPUS_CHAPTERS[mangaId] && OLYMPUS_CHAPTERS[mangaId].length > 0) {
-      return OLYMPUS_CHAPTERS[mangaId];
-    }
-
-    // 2. Check localStorage cache
+    // 1. Check localStorage cache first (stores full chapters list including ch 2, 3, etc.)
     const raw = localStorage.getItem(STORAGE_KEYS.CHAPTERS);
     const map: Record<string, Chapter[]> = raw ? JSON.parse(raw) : {};
     if (map[mangaId] && map[mangaId].length > 0) {
       return map[mangaId];
+    }
+
+    // 2. Check bundled Olympus chapters
+    if (OLYMPUS_CHAPTERS[mangaId] && OLYMPUS_CHAPTERS[mangaId].length > 0) {
+      return OLYMPUS_CHAPTERS[mangaId];
     }
 
     // 3. Check demo chapters

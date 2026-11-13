@@ -64,18 +64,26 @@ const KindlePageImage: React.FC<KindlePageImageProps> = ({
   }, [src]);
 
   const handleError = () => {
-    // If e.g. /01.webp fails, try /1.webp
+    // Systematic fallback through Olympus naming patterns:
+    // 01.webp -> 1.webp -> 001.webp -> 01_01.webp -> 1_01.webp -> 0.webp -> 0.1.webp
     if (attempt === 0 && /\/0(\d+\.webp)$/.test(currentSrc)) {
       setAttempt(1);
       setCurrentSrc(currentSrc.replace(/\/0(\d+\.webp)$/, '/$1'));
     } else if (attempt <= 1 && /\/(\d+\.webp)$/.test(currentSrc) && !currentSrc.includes('/00')) {
-      // try /001.webp
       setAttempt(2);
       setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/00$1'));
     } else if (attempt <= 2 && !currentSrc.includes('_')) {
-      // try /1_01.webp pattern
       setAttempt(3);
-      setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/1_$1'));
+      setCurrentSrc(currentSrc.replace(/\/(\d+\.webp)$/, '/01_$1'));
+    } else if (attempt <= 3 && currentSrc.includes('/01_')) {
+      setAttempt(4);
+      setCurrentSrc(currentSrc.replace(/\/01_(\d+\.webp)$/, '/1_$1'));
+    } else if (attempt <= 4 && (currentSrc.includes('/1.webp') || currentSrc.includes('/01.webp') || currentSrc.includes('/1_01.webp'))) {
+      setAttempt(5);
+      setCurrentSrc(currentSrc.replace(/\/[^/]+\.webp$/, '/0.webp'));
+    } else if (attempt <= 5 && currentSrc.includes('/0.webp')) {
+      setAttempt(6);
+      setCurrentSrc(currentSrc.replace(/\/0\.webp$/, '/0.1.webp'));
     } else {
       setIsBroken(true);
     }
@@ -155,16 +163,16 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
 
   // Sync chaptersList with allChapters
   useEffect(() => {
-    if (manga.source === 'olympus') {
+    if (manga.source === 'olympus' || manga.id.startsWith('olympus-')) {
       const slug = (manga as any).olympusSlug || manga.id.replace('olympus-', '');
       fetchOlympusChapters(manga.id, slug).then((chs) => {
         if (chs.length > 0) {
           setChaptersList(chs);
-        } else if (allChapters && allChapters.length > 0) {
+        } else if (allChapters && allChapters.length > chaptersList.length) {
           setChaptersList(allChapters);
         }
       });
-    } else if (allChapters && allChapters.length > 0) {
+    } else if (allChapters && allChapters.length > chaptersList.length) {
       setChaptersList(allChapters);
     }
   }, [allChapters, manga.id]);
@@ -831,7 +839,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
           >
             {pages.map((pageUrl, idx) => (
               <div
-                key={idx}
+                key={`${chapter.id}-${pageUrl}-${idx}`}
                 data-page-index={idx + 1}
                 className="relative w-full max-w-2xl flex flex-col items-center"
               >
@@ -869,6 +877,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
           <div className="relative flex flex-col items-center justify-center p-2 max-h-full max-w-full">
             {pages[currentPage - 1] ? (
               <KindlePageImage
+                key={`${chapter.id}-${currentPage}-${pages[currentPage - 1]}`}
                 src={pages[currentPage - 1]}
                 alt={`Página ${currentPage}`}
                 className={`${getImageFitClass()} shadow-md transition-all select-none`}

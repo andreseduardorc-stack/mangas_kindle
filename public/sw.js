@@ -1,5 +1,5 @@
 // Service Worker for Kindle Manga & Manhwa Reader (PWABuilder & GitHub Pages Ready)
-const CACHE_NAME = 'kindle-manga-cache-v4';
+const CACHE_NAME = 'kindle-manga-cache-v5';
 
 const STATIC_ASSETS = [
   './',

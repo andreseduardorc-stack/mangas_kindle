@@ -111,12 +111,30 @@ export async function fetchOlympusChapters(mangaId: string, slug?: string): Prom
   if (chInfo && chInfo.chapters && chInfo.chapters.length > 0) {
     const chapters: Chapter[] = chInfo.chapters.map((ch) => {
       const chNum = String(ch.name);
+      const numClean = String(parseFloat(chNum) || chNum);
       
-      // Check preloaded pages specifically for this chapter number
+      // Check preloaded pages specifically for this chapter number (exact or clean)
       let pages: string[] =
         preloadedPagesData[`olympus-${effectiveSlug}_ch_${chNum}`] ||
+        preloadedPagesData[`olympus-${effectiveSlug}_ch_${numClean}`] ||
         (seriesId ? preloadedPagesData[`series_${seriesId}_ch_${chNum}`] : undefined) ||
+        (seriesId ? preloadedPagesData[`series_${seriesId}_ch_${numClean}`] : undefined) ||
         [];
+
+      // Check localStorage cache if not preloaded
+      if (pages.length === 0) {
+        try {
+          const cached =
+            localStorage.getItem(`olympus_pages_${effectiveSlug}_ch_${chNum}`) ||
+            localStorage.getItem(`olympus_pages_${effectiveSlug}_ch_${numClean}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              pages = parsed;
+            }
+          }
+        } catch {}
+      }
 
       // If chapter 1 and curated has pages, use curated pages
       if (chNum === '1' && pages.length === 0) {
@@ -146,10 +164,20 @@ export async function fetchOlympusChapters(mangaId: string, slug?: string): Prom
       for (let i = 1; i <= total; i++) {
         if (!existingNumbers.has(i)) {
           const chNum = String(i);
-          const pages =
+          let pages =
             preloadedPagesData[`olympus-${effectiveSlug}_ch_${chNum}`] ||
             (seriesId ? preloadedPagesData[`series_${seriesId}_ch_${chNum}`] : undefined) ||
             [];
+
+          if (pages.length === 0) {
+            try {
+              const cached = localStorage.getItem(`olympus_pages_${effectiveSlug}_ch_${chNum}`);
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) pages = parsed;
+              }
+            } catch {}
+          }
 
           chapters.push({
             id: `${mangaId}-ch-${chNum}`,
@@ -206,33 +234,39 @@ export async function fetchOlympusChapterPages(
   const series = findSeriesInfo(mangaId, slug);
   const effectiveSlug = series?.slug || slug || mangaId.replace('olympus-', '');
   const seriesId = series ? String(series.id) : null;
+  const numClean = String(parseFloat(chapterNumber) || chapterNumber);
 
   // 1. Check curated chapters specifically for this chapter number
   const existingChapters = OLYMPUS_CHAPTERS[mangaId];
   if (existingChapters) {
-    const found = existingChapters.find((c) => String(c.chapterNumber) === String(chapterNumber));
+    const found = existingChapters.find(
+      (c) => String(c.chapterNumber) === String(chapterNumber) || String(c.chapterNumber) === numClean
+    );
     if (found && found.pages && found.pages.length > 0) {
       return found.pages;
     }
   }
 
   // 2. Check bundled preloaded pages for this exact chapter
-  const preloadedKey = `olympus-${effectiveSlug}_ch_${chapterNumber}`;
-  if (preloadedPagesData[preloadedKey] && preloadedPagesData[preloadedKey].length > 0) {
-    return preloadedPagesData[preloadedKey];
-  }
+  const candidateKeys = [
+    `olympus-${effectiveSlug}_ch_${chapterNumber}`,
+    `olympus-${effectiveSlug}_ch_${numClean}`,
+    seriesId ? `series_${seriesId}_ch_${chapterNumber}` : '',
+    seriesId ? `series_${seriesId}_ch_${numClean}` : '',
+  ].filter(Boolean);
 
-  if (seriesId) {
-    const seriesKey = `series_${seriesId}_ch_${chapterNumber}`;
-    if (preloadedPagesData[seriesKey] && preloadedPagesData[seriesKey].length > 0) {
-      return preloadedPagesData[seriesKey];
+  for (const k of candidateKeys) {
+    if (preloadedPagesData[k] && preloadedPagesData[k].length > 0) {
+      return preloadedPagesData[k];
     }
   }
 
   // 3. Check localStorage cache for this specific chapter
   const localCacheKey = `olympus_pages_${effectiveSlug}_ch_${chapterNumber}`;
   try {
-    const cached = localStorage.getItem(localCacheKey);
+    const cached =
+      localStorage.getItem(localCacheKey) ||
+      localStorage.getItem(`olympus_pages_${effectiveSlug}_ch_${numClean}`);
     if (cached) {
       const pages = JSON.parse(cached);
       if (Array.isArray(pages) && pages.length > 0) {
@@ -241,29 +275,13 @@ export async function fetchOlympusChapterPages(
     }
   } catch {}
 
-  // 4. If we have seriesId and chapterId from index, generate candidate CDN URLs for this specific chapter
-  if (seriesId && seriesChaptersData[seriesId]) {
-    const chMeta = seriesChaptersData[seriesId].chapters.find(
-      (c) => String(c.name) === String(chapterNumber)
-    );
-    if (chMeta && chMeta.id) {
-      const chapterInternalId = chMeta.id;
-      // Generate up to 45 candidate CDN page URLs for this specific chapter ID
-      const candidatePages: string[] = [];
-      for (let p = 1; p <= 45; p++) {
-        const pStr = p < 10 ? `0${p}` : `${p}`;
-        candidatePages.push(
-          `https://media.imagesolymp.xyz/comics/${seriesId}/${chapterInternalId}/${pStr}.webp`
-        );
-      }
-      return candidatePages;
-    }
-  }
-
-  // 5. Fallback: Live fetch attempt via CORS proxy if online (fast 3s timeout)
+  // 4. Live fetch attempt via CORS proxy if online (fast 4s timeout)
   const proxyUrls = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(
       `https://olympusxyz.com/series/comic-${effectiveSlug}/capitulo/${chapterNumber}`
+    )}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(
+      `https://olympusxyz.com/series/comic-${effectiveSlug}/capitulo/${numClean}`
     )}`,
     `/olympus-api/series/comic-${effectiveSlug}/capitulo/${chapterNumber}`,
   ];
@@ -271,7 +289,7 @@ export async function fetchOlympusChapterPages(
   for (const pUrl of proxyUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
 
       const res = await fetch(pUrl, {
         signal: controller.signal,
@@ -289,7 +307,15 @@ export async function fetchOlympusChapterPages(
         (u) => !u.includes('/covers/') && !u.includes('/teams/')
       );
 
-      const uniquePages = Array.from(new Set(pageImgs));
+      const seen = new Set<string>();
+      const uniquePages: string[] = [];
+      for (const p of pageImgs) {
+        if (!seen.has(p)) {
+          seen.add(p);
+          uniquePages.push(p);
+        }
+      }
+
       if (uniquePages.length > 0) {
         try {
           localStorage.setItem(localCacheKey, JSON.stringify(uniquePages));
@@ -297,10 +323,27 @@ export async function fetchOlympusChapterPages(
         return uniquePages;
       }
     } catch {
-      // try next
+      // try next proxy
     }
   }
 
-  // NOTE: Never return chapter 1 pages when a different chapter was requested!
+  // 5. Fallback: If we have seriesId and chapterId from index, generate candidate CDN URLs as last resort
+  if (seriesId && seriesChaptersData[seriesId]) {
+    const chMeta = seriesChaptersData[seriesId].chapters.find(
+      (c) => String(c.name) === String(chapterNumber) || String(c.name) === numClean
+    );
+    if (chMeta && chMeta.id) {
+      const chapterInternalId = chMeta.id;
+      const candidatePages: string[] = [];
+      for (let p = 1; p <= 35; p++) {
+        const pStr = p < 10 ? `0${p}` : `${p}`;
+        candidatePages.push(
+          `https://media.imagesolymp.xyz/comics/${seriesId}/${chapterInternalId}/${pStr}.webp`
+        );
+      }
+      return candidatePages;
+    }
+  }
+
   return [];
 }
