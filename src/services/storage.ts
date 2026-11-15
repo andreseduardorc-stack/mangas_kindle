@@ -94,7 +94,15 @@ export function saveChapters(mangaId: string, chapters: Chapter[]): void {
     const raw = localStorage.getItem(STORAGE_KEYS.CHAPTERS);
     const map: Record<string, Chapter[]> = raw ? JSON.parse(raw) : {};
     map[mangaId] = chapters;
-    localStorage.setItem(STORAGE_KEYS.CHAPTERS, JSON.stringify(map));
+    try {
+      localStorage.setItem(STORAGE_KEYS.CHAPTERS, JSON.stringify(map));
+    } catch {
+      // Una serie de Olympus puede traer más de mil capítulos y, con sus
+      // páginas dentro, reventar la cuota. Las páginas ya se cachean aparte
+      // capítulo a capítulo, así que la lista se guarda sin ellas.
+      map[mangaId] = chapters.map((c) => ({ ...c, pages: [] }));
+      localStorage.setItem(STORAGE_KEYS.CHAPTERS, JSON.stringify(map));
+    }
   } catch (err) {
     console.warn('Error saving chapters to localStorage', err);
   }

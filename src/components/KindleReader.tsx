@@ -20,7 +20,11 @@ import {
 } from 'lucide-react';
 import type { Manga, Chapter, ReaderSettings, Bookmark, ReadingMode, KindleTheme, FitMode } from '../types';
 import { fetchChapterPages } from '../services/mangaDexApi';
-import { fetchOlympusChapterPages, fetchOlympusChapters } from '../services/olympusService';
+import {
+  OlympusUnavailableError,
+  fetchOlympusChapterPages,
+  fetchOlympusChapters,
+} from '../services/olympusService';
 
 interface KindleReaderProps {
   manga: Manga;
@@ -133,6 +137,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
   const [pages, setPages] = useState<string[]>(chapter.pages || []);
   const [loadingPages, setLoadingPages] = useState<boolean>(false);
+  const [pagesError, setPagesError] = useState<string | null>(null);
   const [showOverlays, setShowOverlays] = useState<boolean>(false);
   const [showAaMenu, setShowAaMenu] = useState<boolean>(false);
   const [showChapterList, setShowChapterList] = useState<boolean>(false);
@@ -184,6 +189,8 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
       verticalContainerRef.current.scrollTop = 0;
     }
 
+    setPagesError(null);
+
     if (chapter.pages && chapter.pages.length > 0) {
       setPages(chapter.pages);
       setLoadingPages(false);
@@ -198,15 +205,19 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
 
       fetchPromise
         .then((fetchedPages) => {
-          if (fetchedPages.length > 0) {
-            setPages(fetchedPages);
-          } else {
-            setPages([]);
-          }
+          setPages(fetchedPages);
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
           console.error(err);
           setPages([]);
+          // Distinguimos "no hay conexión con Olympus" de "el capítulo está
+          // vacío": antes las dos cosas daban el mismo mensaje y no había
+          // forma de saber cuál de las dos estaba pasando.
+          setPagesError(
+            err instanceof OlympusUnavailableError
+              ? 'No se pudo conectar con Olympus. Esta página necesita el proxy que levanta «npm run dev» o «npm run preview».'
+              : 'Hubo un error al pedir las páginas de este capítulo.'
+          );
         })
         .finally(() => setLoadingPages(false));
     }
@@ -804,7 +815,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
               {chapter.title}
             </h3>
             <p className="text-xs font-sans text-[#635f56] leading-relaxed">
-              Las imágenes de este capítulo no se encuentran disponibles temporalmente en el servidor de Olympus.
+              {pagesError ?? 'Olympus no publica imágenes para este capítulo.'}
             </p>
             <div className="flex items-center space-x-3 pt-2 font-sans text-xs">
               {hasPrevChapter && (

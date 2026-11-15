@@ -23,6 +23,7 @@ import { ImportView } from './components/ImportView';
 import { MangaDetailModal } from './components/MangaDetailModal';
 import { KindleReader } from './components/KindleReader';
 import { BookmarksModal } from './components/BookmarksModal';
+import { ensureFreshOlympusCatalog } from './services/olympusService';
 import { Smartphone, Monitor } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -44,6 +45,14 @@ export const App: React.FC = () => {
 
   // Kindle Frame Bezel simulation toggle (Kindle Paperwhite frame)
   const [showKindleBezel, setShowKindleBezel] = useState<boolean>(false);
+
+  // Olympus rota los slugs de sus series cada pocos días y los viejos dan 404.
+  // El refresco del catálogo es lo que devuelve los slugs actuales, así que se
+  // lanza al arrancar: si esperásemos a que alguien entre en «Descubrir», las
+  // series abiertas desde Inicio o Biblioteca no cargarían.
+  useEffect(() => {
+    void ensureFreshOlympusCatalog();
+  }, []);
 
   // Persist library
   useEffect(() => {

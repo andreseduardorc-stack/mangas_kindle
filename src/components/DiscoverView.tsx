@@ -13,7 +13,11 @@ import {
 } from 'lucide-react';
 import type { Manga } from '../types';
 import { searchMangaDex } from '../services/mangaDexApi';
-import { getFullOlympusCatalog } from '../services/olympusService';
+import {
+  getFullOlympusCatalog,
+  mapOlympusItemToManga,
+  refreshOlympusCatalog,
+} from '../services/olympusService';
 import { DEMO_MANGAS } from '../services/sampleData';
 
 interface DiscoverViewProps {
@@ -38,15 +42,26 @@ export const DiscoverView: React.FC<DiscoverViewProps> = ({
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  const showCatalog = (catalog: Manga[]) => {
+    setAllOlympusSeries(catalog);
+    setFilteredResults(catalog);
+  };
+
   // Load Olympus full catalog
   const loadOlympusCatalog = async (forceSync = false) => {
     if (forceSync) setSyncing(true);
     else setLoading(true);
 
     try {
-      const fullCatalog = await getFullOlympusCatalog();
-      setAllOlympusSeries(fullCatalog);
-      setFilteredResults(fullCatalog);
+      if (forceSync) {
+        // El botón de sincronizar sí espera al catálogo en vivo.
+        const fresh = await refreshOlympusCatalog();
+        if (fresh) showCatalog(fresh.map(mapOlympusItemToManga));
+        return;
+      }
+      // Pintamos ya lo que hay y dejamos que el refresco en vivo repinte después:
+      // trae los slugs actuales, que es lo que mantiene la app funcionando.
+      showCatalog(await getFullOlympusCatalog(showCatalog));
     } catch (err) {
       console.error(err);
     } finally {
