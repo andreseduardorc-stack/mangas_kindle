@@ -35,8 +35,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Sin un proxy, el sitio publicado solo puede mostrar los capítulos que
+      # vienen empaquetados: Olympus filtra por User-Agent y no manda CORS.
+      # Ver worker/olympus-proxy.js y el README.
       - name: Build project
         run: npm run build
+        env:
+          VITE_OLYMPUS_PROXY: ${{ vars.VITE_OLYMPUS_PROXY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
