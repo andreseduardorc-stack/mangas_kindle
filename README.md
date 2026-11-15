@@ -92,6 +92,23 @@ El workflow de `.github/workflows/deploy.yml` lee esa misma variable del reposit
 `VITE_OLYMPUS_PROXY`). Si no está puesta, el sitio se publica igual pero solo mostrará los
 capítulos que vienen empaquetados.
 
+### Quién puede usar el proxy
+
+El worker solo responde a los orígenes de su lista: el dominio de Pages del proyecto y unos
+cuantos `localhost` para probar el build estático. A cualquier otra web le devuelve **403**.
+La lista se cambia sin tocar el código, con una variable del worker:
+
+```powershell
+npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy `
+  --compatibility-date 2026-11-14 `
+  --var ALLOWED_ORIGINS:"https://midominio.com,https://otro.com"
+```
+
+**Esto no es una cerradura, es un cartel de «no pasar».** CORS lo aplica el navegador, así
+que impide que otra *página web* use el proxy, pero no impide que alguien lo llame con `curl`
+o desde un servidor: una petición sin cabecera `Origin` pasa igual. Para cerrarlo de verdad
+haría falta una clave compartida.
+
 ---
 
 ## Qué trae empaquetado y para qué
