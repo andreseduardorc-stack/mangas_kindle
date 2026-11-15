@@ -1,0 +1,33 @@
+name = "olympus-proxy"
+main = "olympus-proxy.js"
+compatibility_date = "2026-11-14"
+
+# Desplegar desde la raíz del proyecto:
+#   npx wrangler deploy -c worker/wrangler.toml
+#
+# La clave compartida NO va aquí, va como secreto:
+#   npx wrangler secret put PROXY_KEY -c worker/wrangler.toml
+
+[vars]
+# Quién puede llamar al proxy desde un navegador, separados por comas.
+# Si se deja vacío, el worker usa la lista que trae el código.
+ALLOWED_ORIGINS = "https://andreseduardorc-stack.github.io,http://localhost:4173,http://localhost:5173,http://127.0.0.1:5300"
+
+# Límite de peticiones por IP.
+#
+# El número está dimensionado contra el pico legítimo de la app, no al azar:
+# al arrancar en frío barre el catálogo (60 peticiones en unos 4 s) y la lista
+# de capítulos de una serie larga son otras 31. Un pico normal ronda las 95 en
+# quince segundos, así que 300 por minuto deja sitio a tres o cuatro personas
+# detrás de la misma IP y aun así corta el abuso.
+#
+# Para cambiarlo hay que editar esto y volver a desplegar: el límite se fija al
+# crear el binding, no se puede leer de una variable en tiempo de ejecución.
+# El periodo solo admite 10 o 60.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 300
+  period = 60

@@ -12,25 +12,38 @@
  *   2. Sigue la redirección 302 de olympusxyz.com al dominio que toque hoy.
  *   3. Añade las cabeceras CORS que Olympus no manda.
  *
- * Desplegar (Cloudflare Workers, plan gratuito):
- *   npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy \
- *     --compatibility-date 2026-11-14
- *   npx wrangler secret put PROXY_KEY --name olympus-proxy   (opcional)
+ * Desplegar (Cloudflare Workers, plan gratuito). La configuración está en
+ * worker/wrangler.toml, así que no hacen falta banderas:
+ *   npx wrangler deploy -c worker/wrangler.toml
+ *   npx wrangler secret put PROXY_KEY -c worker/wrangler.toml   (opcional)
  *
  * Y luego compilar la app apuntando ahí:
  *   VITE_OLYMPUS_PROXY=https://olympus-proxy.<tu-cuenta>.workers.dev/olympus-api
  *   VITE_OLYMPUS_PROXY_KEY=<la misma clave>
  *
- * SOBRE LA CLAVE COMPARTIDA (PROXY_KEY)
+ * TRES FILTROS, Y CADA UNO FRENA UNA COSA DISTINTA
  *
- * No es un secreto y no hay forma de que lo sea: la app es un sitio estático,
- * así que la clave viaja dentro del JS que descarga cualquiera. Quien abra las
- * herramientas de desarrollo la lee en diez segundos.
+ *   1. ALLOWED_ORIGINS -> 403. Lo aplica el navegador, así que frena a otras
+ *      páginas web, pero no a curl ni a un script.
+ *   2. PROXY_KEY -> 401. Esta sí frena a curl y a los robots que barren
+ *      *.workers.dev. Pero NO es un secreto y no puede serlo: la app es un
+ *      sitio estático, la clave viaja en el JS que descarga cualquiera y se
+ *      lee abriendo el inspector.
+ *   3. RATE_LIMITER -> 429. El último recurso, para cuando alguien saca la
+ *      clave del bundle. Limita por IP.
  *
- * Lo que sí hace: cortar el uso automático de quien encuentre esta URL
- * barriendo *.workers.dev, que es el caso realista. Lo que no hace: frenar a
- * alguien que mire tu bundle. Si lo que te preocupa es la cuota, lo que la
- * protege es un límite de peticiones por IP, no esta clave.
+ * Lo que el límite por IP NO es, para no confiarse:
+ *   - No es global. Cloudflare lo cuenta por centro de datos, así que quien
+ *     reparta las peticiones entre varias regiones multiplica su cupo.
+ *   - Es aproximado. Los contadores se sincronizan por detrás, y una ráfaga
+ *     puede pasarse del límite antes de que se enteren.
+ *   - La propia documentación de Cloudflare desaconseja usar la IP como
+ *     llave, porque hay muchas compartidas. Aquí no hay alternativa: no hay
+ *     usuarios ni sesiones de los que tirar. Por eso el límite va holgado, y
+ *     el peor caso de un falso positivo es que la app tire del volcado
+ *     empaquetado y lo diga en pantalla.
+ *
+ * Para un límite estricto de verdad haría falta un Durable Object.
  */
 
 const ORIGIN = 'https://olympusxyz.com';
@@ -89,7 +102,15 @@ export default {
     const cors = origin ? (permitidos.includes(origin) ? corsHeaders(origin) : null) : {};
 
     if (origin && !cors) {
-      return new Response(`Origen no autorizado: ${origin}`, { status: 403 });
+      // El 403 se devuelve CON cabeceras CORS, aunque el origen no esté en la
+      // lista. Parece contradictorio y no lo es: sin ellas el navegador
+      // convierte la respuesta en un error opaco y la app solo puede decir
+      // "no se pudo contactar", que manda a buscar el problema donde no está.
+      // Aquí no se filtra nada: el cuerpo es un "no" y nada más.
+      return new Response(`Origen no autorizado: ${origin}`, {
+        status: 403,
+        headers: corsHeaders(origin),
+      });
     }
 
     // El preflight va antes que la clave: el navegador nunca manda cabeceras
@@ -108,6 +129,19 @@ export default {
         status: 401,
         headers: cors,
       });
+    }
+
+    // Límite por IP. Va el último de los tres filtros a propósito: rechazar
+    // por origen o por clave no debe gastarle cuota a nadie.
+    if (env?.RATE_LIMITER) {
+      const ip = request.headers.get('CF-Connecting-IP') || 'desconocida';
+      const { success } = await env.RATE_LIMITER.limit({ key: ip });
+      if (!success) {
+        return new Response('Demasiadas peticiones desde esta IP. Prueba en un minuto.', {
+          status: 429,
+          headers: { ...cors, 'Retry-After': '60' },
+        });
+      }
     }
 
     const url = new URL(request.url);

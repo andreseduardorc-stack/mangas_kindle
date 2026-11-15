@@ -28,3 +28,6 @@ dist-ssr
 *.sln
 *.sw?
 scratch/
+
+# Estado local de wrangler (`wrangler dev`), no es del proyecto
+.wrangler/

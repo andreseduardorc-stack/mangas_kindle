@@ -102,10 +102,11 @@ async function proxyFetch(path: string, accept: string): Promise<Response> {
   }
 }
 
-/** El 401 y el 403 los devuelve el proxy, no Olympus: conviene no confundirlos. */
+/** Estos tres los devuelve el proxy, no Olympus: conviene no confundirlos. */
 function proxyRejection(status: number): string | null {
   if (status === 401) return 'El proxy rechazó la clave (VITE_OLYMPUS_PROXY_KEY no coincide con PROXY_KEY).';
   if (status === 403) return 'El proxy no autoriza a este dominio (revisa ALLOWED_ORIGINS en el worker).';
+  if (status === 429) return 'Demasiadas peticiones desde tu conexión. Espera un minuto y vuelve a intentarlo.';
   return null;
 }
 

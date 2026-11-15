@@ -74,10 +74,11 @@ empaquetado está muerta.**
 ## Publicarla en internet
 
 Un hospedaje estático (GitHub Pages, Netlify Drop…) no puede hacer de proxy, así que hay que
-desplegar uno aparte. En `worker/olympus-proxy.js` hay uno listo para Cloudflare Workers:
+desplegar uno aparte. En `worker/` hay uno listo para Cloudflare Workers, con su configuración
+en `worker/wrangler.toml`:
 
 ```powershell
-npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy --compatibility-date 2026-11-14
+npx wrangler deploy -c worker/wrangler.toml
 ```
 
 Y luego se compila la app apuntando ahí:
@@ -98,13 +99,7 @@ Hay dos filtros, y conviene saber qué frena cada uno porque no son lo mismo.
 
 **1. Lista de orígenes.** El worker solo responde a los orígenes de su lista: el dominio de
 Pages del proyecto y unos cuantos `localhost` para probar el build estático. A cualquier otra
-web le devuelve **403**. Se cambia sin tocar el código:
-
-```powershell
-npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy `
-  --compatibility-date 2026-11-14 `
-  --var ALLOWED_ORIGINS:"https://midominio.com,https://otro.com"
-```
+web le devuelve **403**. La lista está en `ALLOWED_ORIGINS`, dentro de `worker/wrangler.toml`.
 
 Esto lo aplica el navegador, así que frena a otras *páginas web*, pero no a `curl` ni a un
 script: una petición sin cabecera `Origin` lo esquiva.
@@ -114,7 +109,7 @@ ese valor y devuelve **401** a quien no la mande. Esto sí frena a `curl` y a lo
 barren `*.workers.dev`, que es el abuso realista.
 
 ```powershell
-npx wrangler secret put PROXY_KEY --name olympus-proxy
+npx wrangler secret put PROXY_KEY -c worker/wrangler.toml
 ```
 
 Y la app se compila con la misma clave, en `VITE_OLYMPUS_PROXY_KEY`. En el workflow va como
@@ -123,12 +118,31 @@ y todo sigue funcionando igual.
 
 > **La clave no es un secreto y no puede serlo.** La app es un sitio estático: la clave viaja
 > dentro del JS que descarga cualquiera y se lee abriendo el inspector. Sirve contra el uso
-> automático, no contra alguien que mire tu bundle. Si lo que te preocupa es la cuota del plan
-> gratuito, lo que la protege es un límite de peticiones por IP, que esto no hace.
+> automático, no contra alguien que mire tu bundle.
 
-Cuando algo de esto falla, la app lo dice con nombre y apellidos en la pantalla del lector
-(«El proxy rechazó la clave…», «El proxy no autoriza a este dominio…») en vez de dejarte
-adivinando.
+**3. Límite por IP.** Para cuando alguien saque la clave del bundle. Son 300 peticiones por
+minuto y por IP, configuradas en `worker/wrangler.toml`, y a partir de ahí devuelve **429**.
+
+El número no es al azar. Medido sobre la app real, el peor caso legítimo —arranque en frío,
+abrir una serie de 201 capítulos y leer uno— gasta **68 peticiones**: 60 del barrido del
+catálogo, 7 de la lista de capítulos y 1 de las páginas. Con 300 caben tres o cuatro personas
+detrás de la misma IP haciendo todo eso a la vez. Para cambiarlo hay que editar el `.toml` y
+volver a desplegar: el límite se fija al crear el binding y no se puede leer de una variable.
+
+> **Tampoco esto es una cuota estricta.** Cloudflare lo cuenta **por centro de datos**, así que
+> quien reparta las peticiones entre regiones multiplica su cupo, y los contadores son
+> aproximados: una ráfaga puede pasarse antes de que se sincronicen. Cloudflare además
+> desaconseja usar la IP como llave porque hay muchas compartidas; aquí no hay alternativa,
+> porque no existen usuarios ni sesiones de los que tirar. Para un límite estricto haría falta
+> un Durable Object.
+
+Los tres filtros van en ese orden —origen, clave, límite— para que un rechazo barato no le
+gaste cuota a nadie. Y los tres responden **con** cabeceras CORS, incluso el 403 a un origen
+no autorizado: sin ellas el navegador convierte la respuesta en un error opaco y la app solo
+podría decir «no se pudo contactar», que manda a buscar el problema donde no está. Así el
+lector dice cuál de los tres saltó («El proxy rechazó la clave…», «El proxy no autoriza a
+este dominio…», «Demasiadas peticiones desde tu conexión…») y la lista de capítulos cae al
+volcado empaquetado en lugar de quedarse vacía.
 
 ---
 
@@ -157,6 +171,7 @@ src/
   data/            volcados de Olympus (ver tabla de arriba)
 worker/
   olympus-proxy.js  proxy para despliegues estáticos
+  wrangler.toml     su configuración: orígenes permitidos y límite por IP
 ```
 
 ---
