@@ -215,7 +215,7 @@ export const KindleReader: React.FC<KindleReaderProps> = ({
           // forma de saber cuál de las dos estaba pasando.
           setPagesError(
             err instanceof OlympusUnavailableError
-              ? 'No se pudo conectar con Olympus. Esta página necesita el proxy que levanta «npm run dev» o «npm run preview».'
+              ? err.message
               : 'Hubo un error al pedir las páginas de este capítulo.'
           );
         })

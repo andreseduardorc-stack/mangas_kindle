@@ -15,9 +15,22 @@
  * Desplegar (Cloudflare Workers, plan gratuito):
  *   npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy \
  *     --compatibility-date 2026-11-14
+ *   npx wrangler secret put PROXY_KEY --name olympus-proxy   (opcional)
  *
  * Y luego compilar la app apuntando ahí:
- *   VITE_OLYMPUS_PROXY=https://olympus-proxy.<tu-cuenta>.workers.dev/olympus-api npm run build
+ *   VITE_OLYMPUS_PROXY=https://olympus-proxy.<tu-cuenta>.workers.dev/olympus-api
+ *   VITE_OLYMPUS_PROXY_KEY=<la misma clave>
+ *
+ * SOBRE LA CLAVE COMPARTIDA (PROXY_KEY)
+ *
+ * No es un secreto y no hay forma de que lo sea: la app es un sitio estático,
+ * así que la clave viaja dentro del JS que descarga cualquiera. Quien abra las
+ * herramientas de desarrollo la lee en diez segundos.
+ *
+ * Lo que sí hace: cortar el uso automático de quien encuentre esta URL
+ * barriendo *.workers.dev, que es el caso realista. Lo que no hace: frenar a
+ * alguien que mire tu bundle. Si lo que te preocupa es la cuota, lo que la
+ * protege es un límite de peticiones por IP, no esta clave.
  */
 
 const ORIGIN = 'https://olympusxyz.com';
@@ -57,7 +70,12 @@ function corsHeaders(origin) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Accept, Content-Type',
+    // X-Proxy-Key no es una cabecera de las que el navegador deja pasar sin
+    // preguntar, así que cada petición dispara antes un OPTIONS. El Max-Age
+    // hace que ese permiso se guarde y no se pague en cada llamada: sin él,
+    // el barrido del catálogo pasaría de 60 peticiones a 120.
+    'Access-Control-Allow-Headers': 'Accept, Content-Type, X-Proxy-Key',
+    'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
   };
 }
@@ -74,11 +92,22 @@ export default {
       return new Response(`Origen no autorizado: ${origin}`, { status: 403 });
     }
 
+    // El preflight va antes que la clave: el navegador nunca manda cabeceras
+    // propias en un OPTIONS, así que exigirla aquí bloquearía todo.
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: cors });
     }
     if (request.method !== 'GET') {
       return new Response('Solo GET', { status: 405, headers: cors });
+    }
+
+    // La clave compartida, si está configurada. Lee la advertencia de arriba
+    // sobre lo que esto frena y lo que no.
+    if (env?.PROXY_KEY && request.headers.get('X-Proxy-Key') !== env.PROXY_KEY) {
+      return new Response('Clave de proxy incorrecta o ausente', {
+        status: 401,
+        headers: cors,
+      });
     }
 
     const url = new URL(request.url);

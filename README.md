@@ -94,9 +94,11 @@ capítulos que vienen empaquetados.
 
 ### Quién puede usar el proxy
 
-El worker solo responde a los orígenes de su lista: el dominio de Pages del proyecto y unos
-cuantos `localhost` para probar el build estático. A cualquier otra web le devuelve **403**.
-La lista se cambia sin tocar el código, con una variable del worker:
+Hay dos filtros, y conviene saber qué frena cada uno porque no son lo mismo.
+
+**1. Lista de orígenes.** El worker solo responde a los orígenes de su lista: el dominio de
+Pages del proyecto y unos cuantos `localhost` para probar el build estático. A cualquier otra
+web le devuelve **403**. Se cambia sin tocar el código:
 
 ```powershell
 npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy `
@@ -104,10 +106,29 @@ npx wrangler deploy worker/olympus-proxy.js --name olympus-proxy `
   --var ALLOWED_ORIGINS:"https://midominio.com,https://otro.com"
 ```
 
-**Esto no es una cerradura, es un cartel de «no pasar».** CORS lo aplica el navegador, así
-que impide que otra *página web* use el proxy, pero no impide que alguien lo llame con `curl`
-o desde un servidor: una petición sin cabecera `Origin` pasa igual. Para cerrarlo de verdad
-haría falta una clave compartida.
+Esto lo aplica el navegador, así que frena a otras *páginas web*, pero no a `curl` ni a un
+script: una petición sin cabecera `Origin` lo esquiva.
+
+**2. Clave compartida.** Si el worker tiene `PROXY_KEY`, exige la cabecera `X-Proxy-Key` con
+ese valor y devuelve **401** a quien no la mande. Esto sí frena a `curl` y a los robots que
+barren `*.workers.dev`, que es el abuso realista.
+
+```powershell
+npx wrangler secret put PROXY_KEY --name olympus-proxy
+```
+
+Y la app se compila con la misma clave, en `VITE_OLYMPUS_PROXY_KEY`. En el workflow va como
+*secret* del repositorio con ese nombre. Si el worker no tiene `PROXY_KEY`, no se exige nada
+y todo sigue funcionando igual.
+
+> **La clave no es un secreto y no puede serlo.** La app es un sitio estático: la clave viaja
+> dentro del JS que descarga cualquiera y se lee abriendo el inspector. Sirve contra el uso
+> automático, no contra alguien que mire tu bundle. Si lo que te preocupa es la cuota del plan
+> gratuito, lo que la protege es un límite de peticiones por IP, que esto no hace.
+
+Cuando algo de esto falla, la app lo dice con nombre y apellidos en la pantalla del lector
+(«El proxy rechazó la clave…», «El proxy no autoriza a este dominio…») en vez de dejarte
+adivinando.
 
 ---
 

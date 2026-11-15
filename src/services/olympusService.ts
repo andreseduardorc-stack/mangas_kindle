@@ -15,6 +15,12 @@ import type { Manga, Chapter } from '../types';
 
 const PROXY: string = (import.meta.env.VITE_OLYMPUS_PROXY || '/olympus-api').replace(/\/+$/, '');
 
+// Clave compartida con el worker, solo cuando la app se publica como sitio
+// estático. No es un secreto: viaja en el bundle y se lee abriendo el
+// inspector. Sirve para que no cualquiera use el proxy de paso, no para
+// proteger nada. En local va vacía y no se manda la cabecera.
+const PROXY_KEY: string = import.meta.env.VITE_OLYMPUS_PROXY_KEY || '';
+
 /** El catálogo en vivo se refresca como mucho una vez cada 12 h. */
 const CATALOG_TTL_MS = 12 * 60 * 60 * 1000;
 const CATALOG_CACHE_KEY = 'olympus.catalog.v4';
@@ -81,23 +87,35 @@ function ensurePreloadedPages(): Promise<Record<string, string[]>> {
 async function proxyFetch(path: string, accept: string): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const headers: Record<string, string> = { Accept: accept };
+  if (PROXY_KEY) headers['X-Proxy-Key'] = PROXY_KEY;
+
   try {
-    return await fetch(`${PROXY}${path}`, {
-      signal: controller.signal,
-      headers: { Accept: accept },
-    });
+    return await fetch(`${PROXY}${path}`, { signal: controller.signal, headers });
   } catch (err) {
     throw new OlympusUnavailableError(
-      `No se pudo contactar con Olympus a través del proxy (${PROXY}): ${(err as Error).message}`
+      `No se pudo contactar con el proxy (${PROXY}). Esta página lo necesita para hablar con ` +
+        `Olympus: lo levantan «npm run dev» y «npm run preview».`
     );
   } finally {
     clearTimeout(timer);
   }
 }
 
+/** El 401 y el 403 los devuelve el proxy, no Olympus: conviene no confundirlos. */
+function proxyRejection(status: number): string | null {
+  if (status === 401) return 'El proxy rechazó la clave (VITE_OLYMPUS_PROXY_KEY no coincide con PROXY_KEY).';
+  if (status === 403) return 'El proxy no autoriza a este dominio (revisa ALLOWED_ORIGINS en el worker).';
+  return null;
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await proxyFetch(path, 'application/json');
-  if (!res.ok) throw new OlympusUnavailableError(`Olympus respondió ${res.status} a ${path}`);
+  if (!res.ok) {
+    throw new OlympusUnavailableError(
+      proxyRejection(res.status) || `Olympus respondió ${res.status} a ${path}`
+    );
+  }
   return (await res.json()) as T;
 }
 
@@ -550,7 +568,8 @@ export async function fetchOlympusChapterPages(
   if (res.status === 404) return [];
   if (!res.ok) {
     throw new OlympusUnavailableError(
-      `Olympus respondió ${res.status} al pedir el capítulo ${chapterNumber}.`
+      proxyRejection(res.status) ||
+        `Olympus respondió ${res.status} al pedir el capítulo ${chapterNumber}.`
     );
   }
 

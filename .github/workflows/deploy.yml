@@ -42,6 +42,9 @@ jobs:
         run: npm run build
         env:
           VITE_OLYMPUS_PROXY: ${{ vars.VITE_OLYMPUS_PROXY }}
+          # Va como secret por costumbre, pero acaba dentro del bundle que se
+          # publica: no es secreta de verdad. Ver el README.
+          VITE_OLYMPUS_PROXY_KEY: ${{ secrets.VITE_OLYMPUS_PROXY_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
